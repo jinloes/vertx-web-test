@@ -1,9 +1,6 @@
 package com.jinloes;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
@@ -15,9 +12,15 @@ import io.vertx.ext.web.handler.BodyHandler;
  */
 public class Server extends AbstractVerticle {
     public static void main(String[] args) {
-        Vertx vertx = Vertx.vertx();
-        vertx.deployVerticle(new Server());
-        vertx.deployVerticle(new ToDoService());
+        Vertx.clusteredVertx(new VertxOptions(), new Handler<AsyncResult<Vertx>>() {
+            @Override
+            public void handle(AsyncResult<Vertx> event) {
+                Vertx vertx = event.result();
+                vertx.deployVerticle(new Server());
+                vertx.deployVerticle(new ToDoService());
+            }
+        });
+
     }
 
     @Override
@@ -46,6 +49,6 @@ public class Server extends AbstractVerticle {
         });
 
 
-        vertx.createHttpServer().requestHandler(router::accept).listen(8080);
+        vertx.createHttpServer().requestHandler(router::accept).listen(8181);
     }
 }
