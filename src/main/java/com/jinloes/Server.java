@@ -12,20 +12,16 @@ import io.vertx.ext.web.handler.BodyHandler;
  */
 public class Server extends AbstractVerticle {
     public static void main(String[] args) {
-        Vertx.clusteredVertx(new VertxOptions(), new Handler<AsyncResult<Vertx>>() {
-            @Override
-            public void handle(AsyncResult<Vertx> event) {
-                Vertx vertx = event.result();
-                vertx.deployVerticle(new Server());
-                vertx.deployVerticle(new ToDoService());
-            }
+        Vertx.clusteredVertx(new VertxOptions(), event -> {
+            Vertx vertx1 = event.result();
+            vertx1.deployVerticle(new Server());
+            vertx1.deployVerticle(new ToDoService());
         });
 
     }
 
     @Override
     public void start() throws Exception {
-
         Router router = Router.router(vertx);
 
         router.route().handler(BodyHandler.create());
@@ -39,14 +35,13 @@ public class Server extends AbstractVerticle {
                                         .end(result.result().body().encodePrettily());
                             }
                         }));
-        router.post("/todos").handler(routingContext -> {
-            vertx.eventBus().send("createTodo", "", result -> {
-                HttpServerResponse httpServerResponse = routingContext.response();
-                httpServerResponse.putHeader("content-type", "application/json")
-                        .end(new JsonObject().put("message", result.result().body())
-                                .encodePrettily());
-            });
-        });
+        router.post("/todos").handler(routingContext ->
+                vertx.eventBus().send("createTodo", "", result -> {
+                    HttpServerResponse httpServerResponse = routingContext.response();
+                    httpServerResponse.putHeader("content-type", "application/json")
+                            .end(new JsonObject().put("message", result.result().body())
+                                    .encodePrettily());
+                }));
 
 
         vertx.createHttpServer().requestHandler(router::accept).listen(8181);
