@@ -10,17 +10,12 @@ import io.vertx.ext.web.handler.BodyHandler;
 import java.lang.management.ManagementFactory;
 
 /**
- * Created by jinloes on 7/31/15.
+ * Created by rr2re on 9/3/2015.
  */
-public class Server extends AbstractVerticle {
+public class Server2 extends AbstractVerticle {
     public static void main(String[] args) {
-        Vertx.clusteredVertx(new VertxOptions().setClustered(true).setHAEnabled(true),
-                event -> {
-                    Vertx vertx1 = event.result();
-                    vertx1.deployVerticle(new Server());
-                    vertx1.deployVerticle(new ToDoService());
-                    //vertx1.deployVerticle(PrintingService.class.getCanonicalName());
-                });
+        Vertx.clusteredVertx(new VertxOptions().setClustered(true).setHAEnabled(true), event -> {
+        });
 
     }
 
@@ -32,13 +27,6 @@ public class Server extends AbstractVerticle {
         router.post("/deployprinter").handler(routingContext -> {
             vertx.deployVerticle(new PrintingService());
             routingContext.response().end();
-        });
-        router.get("/getconsumer").handler(routingContext -> {
-            HttpServerResponse response =  routingContext.response();
-            final String name = ManagementFactory.getRuntimeMXBean().getName();
-            JsonObject object = new JsonObject()
-                    .put("running on", "Running on " + name);
-            response.end(object.toString());
         });
         router.get("/todos/:toDoId").handler(routingContext ->
                 vertx.eventBus().send("getTodo", routingContext.request().getParam("todoId"),
@@ -58,6 +46,6 @@ public class Server extends AbstractVerticle {
                                     .encodePrettily());
                 }));
 
-        vertx.createHttpServer().requestHandler(router::accept).listen(8080);
+        vertx.createHttpServer().requestHandler(router::accept).listen(8181);
     }
 }
