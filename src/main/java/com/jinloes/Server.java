@@ -1,13 +1,11 @@
 package com.jinloes;
 
-import com.hazelcast.config.Config;
 import io.vertx.core.*;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 import java.lang.management.ManagementFactory;
 
@@ -16,11 +14,7 @@ import java.lang.management.ManagementFactory;
  */
 public class Server extends AbstractVerticle {
     public static void main(String[] args) {
-        Config config = new Config();
-        config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true).addMember("10.0.0.3:5701");
-        config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-        Vertx.clusteredVertx(new VertxOptions().setClusterManager(new HazelcastClusterManager(config))
-                        .setClustered(true).setHAEnabled(true),
+        Vertx.clusteredVertx(new VertxOptions().setClustered(true).setHAEnabled(true),
                 event -> {
                     Vertx vertx1 = event.result();
                     vertx1.deployVerticle(new Server());
@@ -40,7 +34,7 @@ public class Server extends AbstractVerticle {
             routingContext.response().end();
         });
         router.get("/getconsumer").handler(routingContext -> {
-            HttpServerResponse response =  routingContext.response();
+            HttpServerResponse response = routingContext.response();
             final String name = ManagementFactory.getRuntimeMXBean().getName();
             JsonObject object = new JsonObject()
                     .put("running on", "Running on " + name);

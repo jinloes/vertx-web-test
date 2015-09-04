@@ -16,7 +16,6 @@ public class Server2 extends AbstractVerticle {
     public static void main(String[] args) {
         Vertx.clusteredVertx(new VertxOptions().setClustered(true).setHAEnabled(true), event -> {
         });
-
     }
 
     @Override
