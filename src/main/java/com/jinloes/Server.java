@@ -14,12 +14,12 @@ import java.lang.management.ManagementFactory;
  */
 public class Server extends AbstractVerticle {
     public static void main(String[] args) {
-        Vertx.clusteredVertx(new VertxOptions().setClustered(true).setHAEnabled(true),
+        Vertx.clusteredVertx(new VertxOptions().setHAEnabled(true),
                 event -> {
                     Vertx vertx1 = event.result();
                     vertx1.deployVerticle(new Server());
                     vertx1.deployVerticle(new ToDoService());
-                    vertx1.deployVerticle(PrintingService.class.getCanonicalName());
+                    vertx1.deployVerticle(PrintingService.class.getCanonicalName(), new DeploymentOptions().setHa(true));
                 });
 
     }
